@@ -2,9 +2,10 @@ __author__ = 'Fule Liu'
 
 import sys
 import re
-import math
 
 from pseALL.util import frequency
+from pseALL.util import get_data
+from pseALL.data import index_list
 
 sys.setrecursionlimit(99999999)
 
@@ -65,78 +66,68 @@ def find_revcomp(sequence, revcomp_dictionary):
     return return_value
 
 
-def cmp(a, b):
+def _cmp(a, b):
     return (a > b) - (a < b)
 
 
 def make_revcomp_kmer_list(kmer_list):
     revcomp_dictionary = {}
-    new_kmer_list = [kmer for kmer in kmer_list if cmp(kmer, find_revcomp(kmer, revcomp_dictionary)) <= 0]
+    new_kmer_list = [kmer for kmer in kmer_list if _cmp(kmer, find_revcomp(kmer, revcomp_dictionary)) <= 0]
     return new_kmer_list
 
 
-def make_kmer_vector(k, alphabet, seq_list, revcomp=False):
+def make_kmer_vector(k, alphabet, filename, revcomp=False):
     """Generate kmer vector."""
-    if revcomp and re.search(r'[^acgtACGT]', ''.join(alphabet)) is not None:
-        print("Error, Only DNA sequence can be reverse compliment.")
-        sys.exit(0)
+    with open(filename) as f:
+        seq_list = get_data(f, alphabet=alphabet)
 
-    kmer_list = make_kmer_list(k, alphabet)
-    revc_kmer_list = make_revcomp_kmer_list(kmer_list)
+        if revcomp and re.search(r'[^acgtACGT]', ''.join(alphabet)) is not None:
+            print("Error, Only DNA sequence can be reverse compliment.")
+            sys.exit(0)
 
-    count_sum = 0
-    vector = []
-    for seq in seq_list:
-        # Generate the kmer frequency dict.
-        kmer_count = {}
-        for kmer in kmer_list:
-            temp_count = frequency(seq, kmer)
-            if revcomp:
-                rev_kmer = find_revcomp(kmer, {})
-                if kmer <= rev_kmer:
+        kmer_list = make_kmer_list(k, alphabet)
+
+        count_sum = 0
+        vector = []
+        for seq in seq_list:
+            # Generate the kmer frequency dict.
+            kmer_count = {}
+            for kmer in kmer_list:
+                temp_count = frequency(seq, kmer)
+                if revcomp:
+                    rev_kmer = find_revcomp(kmer, {})
+                    if kmer <= rev_kmer:
+                        if kmer not in kmer_count:
+                            kmer_count[kmer] = 0
+                        kmer_count[kmer] += temp_count
+                    else:
+                        if rev_kmer not in kmer_count:
+                            kmer_count[rev_kmer] = 0
+                        kmer_count[rev_kmer] += temp_count
+                else:
                     if kmer not in kmer_count:
                         kmer_count[kmer] = 0
                     kmer_count[kmer] += temp_count
-                else:
-                    if rev_kmer not in kmer_count:
-                        kmer_count[rev_kmer] = 0
-                    kmer_count[rev_kmer] += temp_count
+                count_sum += temp_count
+
+            # Normalize.
+            if not revcomp:
+                count_vec = [kmer_count[kmer] for kmer in kmer_list]
             else:
-                if kmer not in kmer_count:
-                    kmer_count[kmer] = 0
-                kmer_count[kmer] += temp_count
-            count_sum += temp_count
+                revc_kmer_list = make_revcomp_kmer_list(kmer_list)
+                count_vec = [kmer_count[kmer] for kmer in revc_kmer_list]
+            count_vec = [round(float(e)/count_sum, 3) for e in count_vec]
 
-        # Normalize.
-        if not revcomp:
-            count_vec = [kmer_count[kmer] for kmer in kmer_list]
-        else:
-            count_vec = [kmer_count[kmer] for kmer in revc_kmer_list]
-        count_vec = [round(float(e)/count_sum, 3) for e in count_vec]
-
-        vector.append(count_vec)
+            vector.append(count_vec)
 
     return vector
 
 
-from pseALL.util import get_data
-
 if __name__ == '__main__':
+    read_file = "data/test.fasta"
 
-    ALPHABET_dict = {'dna': ['A', 'C', 'G', 'T'],
-                 'rna': ['A', 'C', 'G', 'U'],
-                 'protein': ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L',
-                             'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']}
+    res = make_kmer_vector(2, index_list.RNA, read_file)
+    print(len(res[0]), res)
 
-    seq_list = ['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC']
-    # for alphabet in ALPHABET_dict.keys():
-    #     print(alphabet)
-    #     kmer_list = make_kmer_list(2, ALPHABET_dict[alphabet])
-    #     kmer_vec = make_kmer_vector(2, ALPHABET_dict[alphabet], seq_list)
-    #     print(kmer_list)
-    #     print(kmer_vec)
-
-    print(get_data(open('test'), ALPHABET_dict['dna']))
-    print(make_kmer_vector(2, ALPHABET_dict['dna'], seq_list, revcomp=True))
-
-    # print(make_kmer_vector(2, ALPHABET_dict['dna'], seq_list, True))
+    res = make_kmer_vector(2, index_list.PROTEIN, read_file)
+    print(len(res[0]), res)
