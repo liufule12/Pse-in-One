@@ -6,6 +6,8 @@ import sys
 import os
 import pickle
 
+from pseALL.kmer import make_kmer_list
+
 
 def convert_phyche_index_to_dict(phyche_index, alphabet):
     """Convert phyche index from list to dict."""
@@ -70,6 +72,7 @@ def add_property_id(property_name, property_dict, property_value):
 
 
 def read_index_file(filename):
+    """Read DiProDB file, extra the DNA and RNA index_vals dict."""
     with open(filename) as f:
         lines = f.readlines()
         dna_dict, rna_dict = {}, {}
@@ -107,7 +110,6 @@ def read_index_file(filename):
 
 
 def combine_dna_dict(dna_dict, alphabet, write_file):
-    from pseALL.kmerutil import make_kmer_list
     tri_dna_file = os.path.abspath('..') + '/data/mmc3.data'
     with open(tri_dna_file, 'rb') as f:
         dinucle_property_val = pickle.load(f)
@@ -128,8 +130,6 @@ def combine_dna_dict(dna_dict, alphabet, write_file):
 
 
 def write_rna(rna_dict, filename):
-    import pickle
-    from pseALL.kmerutil import make_kmer_list
     kmer_list = make_kmer_list(k=2, alphabet='ACGU')
 
     dinucle_prop_vals = {}
