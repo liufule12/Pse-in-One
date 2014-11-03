@@ -136,15 +136,13 @@ def read_fasta_check_dna(f, alphabet):
     """
     seq_list = []
     for e in read_fasta_yield(f):
-        # print e
         res = is_under_alphabet(e.seq, alphabet)
         if res:
             seq_list.append(e)
         else:
             error_info = 'Sorry, sequence ' + str(e.no) \
-                         + ' has character ' + str(res) + '.(The character must be A or C or G or T)'
-            sys.stderr(error_info)
-            sys.exit(0)
+                         + ' has character ' + str(res) + '.(The character must be ' + alphabet + ').'
+            sys.exit(error_info)
 
     return seq_list
 
@@ -158,13 +156,11 @@ def get_sequence_check_dna(f, alphabet):
     """
     sequence_list = []
     for e in read_fasta_yield(f):
-        # print e
         res = is_under_alphabet(e.seq, alphabet)
         if res is not True:
-            error_info = 'Sorry, sequence ' + str(e.no) \
-                         + ' has character ' + str(res) + '.(The character must be A, C, G or T)'
-            sys.stderr.write(error_info)
-            sys.exit(0)
+            error_info = 'Error, sequence ' + str(e.no) \
+                         + ' has character ' + str(res) + '.(The character must be ' + alphabet + ').'
+            sys.exit(error_info)
         else:
             sequence_list.append(e.seq)
 
@@ -211,8 +207,7 @@ def get_data(input_data, alphabet, desc=False):
             sys.exit(0)
     else:
         error_info = 'Sorry, the parameter in get_data method must be list or file type.'
-        sys.stderr.write(error_info)
-        sys.exit(0)
+        sys.exit(error_info)
 
 
 """Some basic function for generate feature vector."""
@@ -247,73 +242,29 @@ def write_libsvm(vector_list, label_list, write_file):
     len_vector_list = len(vector_list)
     len_label_list = len(label_list)
     if len_vector_list == 0:
-        sys.stderr.write("The vector is none.")
-        sys.exit(1)
+        sys.exit("The vector is none.")
     if len_label_list == 0:
-        sys.stderr.write("The label is none.")
-        sys.exit(1)
+        sys.exit("The label is none.")
     if len_vector_list != len_label_list:
-        sys.stderr.write("The length of vector and label is different.")
-        sys.exit(1)
+        sys.exit("The length of vector and label is different.")
 
     with open(write_file, 'w') as f:
-        len_vector = len(vector_list[0])
-        for i in range(len_vector_list):
-            temp_write = str(label_list[i])
-            for j in range(0, len_vector):
-                temp_write += ' ' + str(j + 1) + ':' + str(vector_list[i][j])
+        for ind1, vec in enumerate(vector_list):
+            temp_write = str(label_list[ind1])
+            for ind2, val in enumerate(vec):
+                temp_write += ' ' + str(ind2+1) + ':' + str(vec[ind2])
             f.write(temp_write)
             f.write('\n')
 
 
-def generate_phyche_value(k, phyche_index=None, all_property=False, extra_phyche_index=None):
-    """Combine the user selected phyche_list, is_all_property and extra_phyche_index to a new standard phyche_value."""
-    if phyche_index is None:
-        phyche_index = []
-    if extra_phyche_index is None:
-        extra_phyche_index = {}
-
-    diphyche_list = ['Base stacking', 'Protein induced deformability', 'B-DNA twist', 'Dinucleotide GC Content',
-                     'A-philicity', 'Propeller twist', 'Duplex stability:(freeenergy)',
-                     'Duplex tability(disruptenergy)', 'DNA denaturation', 'Bending stiffness', 'Protein DNA twist',
-                     'Stabilising energy of Z-DNA', 'Aida_BA_transition', 'Breslauer_dG', 'Breslauer_dH',
-                     'Breslauer_dS', 'Electron_interaction', 'Hartman_trans_free_energy', 'Helix-Coil_transition',
-                     'Ivanov_BA_transition', 'Lisser_BZ_transition', 'Polar_interaction', 'SantaLucia_dG',
-                     'SantaLucia_dH', 'SantaLucia_dS', 'Sarai_flexibility', 'Stability', 'Stacking_energy',
-                     'Sugimoto_dG', 'Sugimoto_dH', 'Sugimoto_dS', 'Watson-Crick_interaction', 'Twist', 'Tilt',
-                     'Roll', 'Shift', 'Slide', 'Rise']
-    triphyche_list = ['Dnase I', 'Bendability (DNAse)', 'Bendability (consensus)', 'Trinucleotide GC Content',
-                      'Nucleosome positioning', 'Consensus_roll', 'Consensus-Rigid', 'Dnase I-Rigid', 'MW-Daltons',
-                      'MW-kg', 'Nucleosome', 'Nucleosome-Rigid']
-
-    # Set and check physicochemical properties.
-    if 2 == k:
-        if all_property is True:
-            phyche_index = diphyche_list
-        else:
-            for e in phyche_index:
-                if e not in diphyche_list:
-                    error_info = 'Sorry, the physicochemical properties ' + e + ' is not exit.'
-                    import sys
-
-                    sys.stderr.write(error_info)
-                    sys.exit(0)
-    elif 3 == k:
-        if all_property is True:
-            phyche_index = triphyche_list
-        else:
-            for e in phyche_index:
-                if e not in triphyche_list:
-                    error_info = 'Sorry, the physicochemical properties ' + e + ' is not exit.'
-                    import sys
-
-                    sys.stderr.write(error_info)
-                    sys.exit(0)
-
-    # Generate phyche_value.
-    from repDNA.psenacutil import get_phyche_index, extend_phyche_index
-
-    return extend_phyche_index(get_phyche_index(k, phyche_index), extra_phyche_index)
+def write_tab(_vecs, write_file):
+    """Write the vector into disk in tab format."""
+    with open(write_file, 'w') as f:
+        for vec in _vecs:
+            f.write(str(vec[0]))
+            for val in vec[1:]:
+                f.write('\t' + str(val))
+            f.write('\n')
 
 
 def convert_phyche_index_to_dict(phyche_index, alphabet):
@@ -324,9 +275,7 @@ def convert_phyche_index_to_dict(phyche_index, alphabet):
     k = 0
     for i in range(1, 10):
         if len_index_value < 4**i:
-            error_infor = 'Sorry, the number of each index value is must be 4^k.'
-            sys.stdout.write(error_infor)
-            sys.exit(0)
+            sys.exit("Sorry, the number of each index value is must be 4^k.")
         if len_index_value == 4**i:
             k = i
             break
@@ -354,7 +303,7 @@ def standard_deviation(value_list):
     return sqrt(sum([pow(e - average_value, 2) for e in value_list]) * 1.0 / (n - 1))
 
 
-def normalize_index(phyche_index, is_convert_dict=False):
+def normalize_index(phyche_index, alphabet, is_convert_dict=False):
     """Normalize the physicochemical index."""
     normalize_phyche_value = []
     for phyche_value in phyche_index:
@@ -363,8 +312,9 @@ def normalize_index(phyche_index, is_convert_dict=False):
         normalize_phyche_value.append([round((e - average_phyche_value) / sd_phyche, 2) for e in phyche_value])
 
     if is_convert_dict is True:
-        return convert_phyche_index_to_dict(normalize_phyche_value)
+        return convert_phyche_index_to_dict(normalize_phyche_value, alphabet)
 
+    print(normalize_phyche_value)
     return normalize_phyche_value
 
 
@@ -381,10 +331,10 @@ if __name__ == '__main__':
         [[0.026, 0.036, 0.031, 0.033, 0.016, 0.026, 0.014, 0.031, 0.025, 0.025, 0.026, 0.036, 0.017, 0.025, 0.016, 0.026],
          [0.038, 0.038, 0.037, 0.036, 0.025, 0.042, 0.026, 0.037, 0.038, 0.036, 0.042, 0.038, 0.018, 0.038, 0.025, 0.038]]
 
-    for e in (normalize_index(phyche_index)):
+    for e in (normalize_index(phyche_index, alphabet='ACGT')):
         print(e)
 
-    phyche_index_dict = convert_phyche_index_to_dict(normalize_index(phyche_index))
+    phyche_index_dict = normalize_index(phyche_index, alphabet='ACGT', is_convert_dict=True)
     print(phyche_index_dict)
 
-    print(normalize_index(phyche_index, True))
+    # print(normalize_index(phyche_index, True))
