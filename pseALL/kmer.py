@@ -3,9 +3,9 @@ __author__ = 'Fule Liu'
 import sys
 import re
 
-from pseALL.util import frequency
-from pseALL.util import get_data
-from pseALL.data import index_list
+from util import frequency
+from util import get_data
+from data import index_list
 
 sys.setrecursionlimit(99999999)
 
@@ -57,8 +57,8 @@ def find_revcomp(sequence, revcomp_dictionary):
         elif letter == "N":
             return_value += "N"
         else:
-            print("Unknown DNA character (%s)\n" % letter)
-            sys.exit(0)
+            error_info = ("Unknown DNA character (%s)\n" % letter)
+            sys.exit(error_info)
 
     # Store this value for future use.
     revcomp_dictionary[sequence] = return_value
@@ -82,19 +82,22 @@ def make_kmer_vector(k, alphabet, filename, revcomp=False):
         seq_list = get_data(f, alphabet=alphabet)
 
         if revcomp and re.search(r'[^acgtACGT]', ''.join(alphabet)) is not None:
-            print("Error, Only DNA sequence can be reverse compliment.")
-            sys.exit(0)
+            sys.exit("Error, Only DNA sequence can be reverse compliment.")
 
-        kmer_list = make_kmer_list(k, alphabet)
-
-        count_sum = 0
         vector = []
+        kmer_list = make_kmer_list(k, alphabet)
         for seq in seq_list:
+            count_sum = 0
+
             # Generate the kmer frequency dict.
             kmer_count = {}
             for kmer in kmer_list:
                 temp_count = frequency(seq, kmer)
-                if revcomp:
+                if not revcomp:
+                    if kmer not in kmer_count:
+                        kmer_count[kmer] = 0
+                    kmer_count[kmer] += temp_count
+                else:
                     rev_kmer = find_revcomp(kmer, {})
                     if kmer <= rev_kmer:
                         if kmer not in kmer_count:
@@ -104,10 +107,7 @@ def make_kmer_vector(k, alphabet, filename, revcomp=False):
                         if rev_kmer not in kmer_count:
                             kmer_count[rev_kmer] = 0
                         kmer_count[rev_kmer] += temp_count
-                else:
-                    if kmer not in kmer_count:
-                        kmer_count[kmer] = 0
-                    kmer_count[kmer] += temp_count
+
                 count_sum += temp_count
 
             # Normalize.
@@ -124,10 +124,53 @@ def make_kmer_vector(k, alphabet, filename, revcomp=False):
 
 
 if __name__ == '__main__':
-    read_file = "data/test.fasta"
+    import argparse
+    from argparse import RawTextHelpFormatter
 
-    res = make_kmer_vector(2, index_list.RNA, read_file)
-    print(len(res[0]), res)
+    parse = argparse.ArgumentParser(description="This is a kmer module for generate kmer vector.",
+                                    formatter_class=RawTextHelpFormatter)
+    parse.add_argument('inputfile',
+                       help="The input file, in valid FASTA format.")
+    parse.add_argument('outputfile',
+                       help="The outputfile stored results.")
+    parse.add_argument('k', type=int, choices=range(1, 7),
+                       help="The k value of kmer.")
+    parse.add_argument('alphabet', choices=['DNA', 'RNA', 'PROTEIN'],
+                       help="The alphabet of sequences.")
+    parse.add_argument('-r', default=0, type=int, choices=[1, 0],
+                       help="Whether need to reverse complement.\n"
+                            "1 means True, 0 means False. (default = 0)")
+    parse.add_argument('-f', default='tab', choices=['tab', 'svm', 'csv'],
+                       help="The output format (default = tab).\n"
+                            "tab -- Simple format, delimited by TAB.\n"
+                            "svm -- The libSVM training data format.\n"
+                            "csv -- The format that can be loaded into a spreadsheet program.")
 
-    res = make_kmer_vector(2, index_list.PROTEIN, read_file)
-    print(len(res[0]), res)
+    args = parse.parse_args()
+
+    # Set revcomp parameter.
+    if args.r != 1:
+        args.r = False
+    elif args.r == 1 and args.alphabet != 'DNA':
+        print("Error, the -r parameter can only be used in DNA.")
+    elif args.r == 1 and args.alphabet == 'DNA':
+        args.r = True
+
+    # Set alphabet parameter.
+    if args.alphabet == 'DNA':
+        args.alphabet = index_list.DNA
+    elif args.alphabet == 'RNA':
+        args.alphabet = index_list.RNA
+    elif args.alphabet == 'PROTEIN':
+        args.alphabet = index_list.PROTEIN
+
+    res = make_kmer_vector(k=args.k, alphabet=args.alphabet, filename=args.inputfile, revcomp=args.r)
+
+    if args.f == 'svm':
+        from util import write_libsvm
+        write_libsvm(res, [0] * len(res), args.outputfile)
+    elif args.f == 'tab':
+        from util import write_tab
+        write_tab(res, args.outputfile)
+
+    print("Done.")
