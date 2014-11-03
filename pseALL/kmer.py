@@ -166,6 +166,7 @@ if __name__ == '__main__':
 
     res = make_kmer_vector(k=args.k, alphabet=args.alphabet, filename=args.inputfile, revcomp=args.r)
 
+    # Write correspond res file.
     if args.f == 'svm':
         from util import write_libsvm
         write_libsvm(res, [0] * len(res), args.outputfile)
