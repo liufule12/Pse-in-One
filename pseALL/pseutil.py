@@ -37,6 +37,7 @@ def pseknc(input_data, k, w, lamada, phyche_list, alphabet, extra_index_file=Non
         if extra_index_file is not None:
             extra_phyche_index = get_extra_index(extra_index_file)
             from pseALL.util import normalize_index
+
             phyche_vals = get_phyche_value(k, phyche_list, alphabet,
                                            normalize_index(extra_phyche_index, alphabet, is_convert_dict=True))
         else:
@@ -45,6 +46,8 @@ def pseknc(input_data, k, w, lamada, phyche_list, alphabet, extra_index_file=Non
         phyche_vals = get_aaindex(phyche_list)
         if extra_index_file is not None:
             phyche_vals.extend(extend_aaindex(extra_index_file))
+
+    print(phyche_vals)
 
     seq_list = get_data(input_data, alphabet)
 
@@ -334,7 +337,7 @@ if __name__ == '__main__':
     # extra_phyche_index = {'AA': [0.06, 0.5, 0.27, 1.59, 0.11, -0.11, 1],
     # 'AC': [1.50, 0.50, 0.80, 0.13, 1.29, 1.04, 1],
     # 'AG': [0.78, 0.36, 0.09, 0.68, -0.24, -0.62, 1],
-    #                       'AT': [1.07, 0.22, 0.62, -1.02, 2.51, 1.17, 1],
+    # 'AT': [1.07, 0.22, 0.62, -1.02, 2.51, 1.17, 1],
     #                       'CA': [-1.38, -1.36, -0.27, -0.86, -0.62, -1.25, 1],
     #                       'CC': [0.06, 1.08, 0.09, 0.56, -0.82, 0.24, 1],
     #                       'CG': [-1.66, -1.22, -0.44, -0.82, -0.29, -1.39, 1],
@@ -349,44 +352,65 @@ if __name__ == '__main__':
     #                       'TT': [0.06, 0.5, 0.27, 1.59, 0.11, -0.11, 1]}
 
     # Test dna type1.
-    print("Test di_dna.")
+    print("Test di_dna, type1.")
     alphabet = index_list.DNA
     res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=2, w=0.5, lamada=10,
-                 phyche_list=['Twist', 'Tilt', 'Roll', 'Rise', 'Slide', 'Shift'],
-                 extra_index_file=None,
-                 alphabet=alphabet)
+                 phyche_list=['Tilt', 'Roll', 'Rise', 'Slide', 'Shift'],
+                 extra_index_file="data/test_ext_dna.txt", alphabet=alphabet)
 
     for e in res:
         print(e)
 
-    print("Test tri_dna")
+    print("Test tri_dna, type1.")
     alphabet = index_list.DNA
     res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=3, w=0.5, lamada=10,
-                 phyche_list=['Dnase I', 'MW-kg'], extra_index_file=None, alphabet=alphabet)
+                 phyche_list=['Dnase I'],
+                 extra_index_file="data/test_ext_tridna.txt", alphabet=alphabet)
 
     for e in res:
         print(e)
 
     # Test dna type2
+    print("Test di_dna, type2.")
     alphabet = index_list.DNA
     res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=2, w=0.5, lamada=2,
-                 phyche_list=['Twist', 'Tilt', 'Roll'],
-                 extra_index_file=None,
-                 alphabet=alphabet,
-                 theta_type=2)
+                 phyche_list=['Tilt', 'Roll'],
+                 extra_index_file="data/test_ext_dna.txt", alphabet=alphabet, theta_type=2)
 
     for e in res:
         print(len(e), e)
 
+    print("Test tri_dna, type2.")
     alphabet = index_list.DNA
     res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=3, w=0.5, lamada=2,
-                 phyche_list=['Dnase I', 'MW-kg'], extra_index_file=None, alphabet=alphabet, theta_type=2)
+                 phyche_list=['Dnase I'],
+                 extra_index_file="data/test_ext_tridna.txt", alphabet=alphabet, theta_type=2)
 
     for e in res:
         print(e)
 
     # Test rna.
-    print("Test rna.")
+    default_indexs = ['Twist (RNA)', 'Tilt (RNA)', 'Roll (RNA)', 'Rise (RNA)', 'Slide (RNA)', 'Shift (RNA)',
+                      'Stacking energy (RNA)', 'Enthalpy (RNA)1', 'Entropy (RNA)', 'Free energy (RNA)',
+                      'Hydrophilicity (RNA)']
+
+    _default_indexs = ['Twist (RNA)', 'Tilt (RNA)', 'Roll (RNA)', 'Rise (RNA)', 'Slide (RNA)', 'Shift (RNA)',
+                       'Stacking energy (RNA)', 'Enthalpy (RNA)1', 'Entropy (RNA)', 'Free energy (RNA)']
+
+    print("Test rna, type1.")
+    alphabet = index_list.RNA
+    res = pseknc(input_data=['GACUGAACUGCACUUUGGUUUCAUAUUAUUUGCUC'], k=2, w=0.05, lamada=3,
+                 phyche_list=default_indexs, extra_index_file=None,
+                 alphabet=alphabet, theta_type=1)
+    print(res)
+
+    alphabet = index_list.RNA
+    res = pseknc(input_data=['GACUGAACUGCACUUUGGUUUCAUAUUAUUUGCUC'], k=2, w=0.05, lamada=3,
+                 phyche_list=_default_indexs, extra_index_file="data/test_ext_rna.txt",
+                 alphabet=alphabet, theta_type=1)
+    print(res)
+
+    print("Test rna, type2.")
     alphabet = index_list.RNA
     res = pseknc(input_data=['GACUGAACUGCACUUUGGUUUCAUAUUAUUUGCUC'], k=2, w=0.05, lamada=3,
                  phyche_list=['Slide (RNA)', 'Adenine content', 'Hydrophilicity (RNA)'], extra_index_file=None,
@@ -406,5 +430,3 @@ if __name__ == '__main__':
 
     for e in res:
         print(len(e), e)
-
-
