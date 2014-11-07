@@ -5,10 +5,10 @@ import os
 import pickle
 from math import pow
 
-from pseALL.util import frequency
-from pseALL.util import get_data
-from pseALL.kmer import make_kmer_list
-from pseALL.data import index_list
+from util import frequency
+from util import get_data
+from kmer import make_kmer_list
+from data import index_list
 
 
 """Prepare for PseKNC."""
@@ -31,14 +31,14 @@ def pseknc(input_data, k, w, lamada, phyche_list, alphabet, extra_index_file=Non
     :param extra_index_file: a file path includes the user-defined phyche_index.
     :param all_prop: bool, choose all physicochemical properties or not.
     """
-    phyche_list = get_phyche_list(k, phyche_list, extra_index_file=extra_index_file, all_prop=all_prop)
+    phyche_list = get_phyche_list(k, phyche_list,
+                                  extra_index_file=extra_index_file, alphabet=alphabet, all_prop=all_prop)
 
     # Get phyche_vals.
     if alphabet == index_list.DNA or alphabet == index_list.RNA:
         if extra_index_file is not None:
             extra_phyche_index = get_extra_index(extra_index_file)
-            from pseALL.util import normalize_index
-
+            from util import normalize_index
             phyche_vals = get_phyche_value(k, phyche_list, alphabet,
                                            normalize_index(extra_phyche_index, alphabet, is_convert_dict=True))
         else:
@@ -48,7 +48,8 @@ def pseknc(input_data, k, w, lamada, phyche_list, alphabet, extra_index_file=Non
         if extra_index_file is not None:
             phyche_vals.extend(extend_aaindex(extra_index_file))
 
-    seq_list = get_data(input_data, alphabet)
+    with open(input_data) as f:
+        seq_list = get_data(f, alphabet)
 
     return make_pseknc_vector(seq_list, phyche_vals, k, w, lamada, alphabet, theta_type)
 
@@ -61,24 +62,26 @@ def ipseknc(input_data, k, w, lamada, phyche_list, alphabet, extra_index_file=No
     :param extra_index_file: a file path includes the user-defined phyche_index.
     :param all_prop: bool, choose all physicochemical properties or not.
     """
-    phyche_list = get_phyche_list(k=2, phyche_list=phyche_list, extra_index_file=extra_index_file, all_prop=all_prop)
+    phyche_list = get_phyche_list(k=2, phyche_list=phyche_list,
+                                  extra_index_file=extra_index_file, alphabet=alphabet, all_prop=all_prop)
 
     # Get phyche_vals.
     if extra_index_file is not None:
         extra_phyche_index = get_extra_index(extra_index_file)
-        from pseALL.util import normalize_index
+        from util import normalize_index
 
         phyche_vals = get_phyche_value(k=2, phyche_list=phyche_list, alphabet=alphabet,
                                        extra_phyche_index=normalize_index(extra_phyche_index, alphabet, is_convert_dict=True))
     else:
         phyche_vals = get_phyche_value(k=2, phyche_list=phyche_list, alphabet=alphabet)
 
-    seq_list = get_data(input_data, alphabet)
+    with open(input_data) as f:
+        seq_list = get_data(f, alphabet)
 
     return make_pseknc_vector(seq_list, phyche_vals, k, w, lamada, alphabet, theta_type=3)
 
 
-def get_phyche_list(k, phyche_list, extra_index_file, all_prop=False):
+def get_phyche_list(k, phyche_list, extra_index_file, alphabet, all_prop=False):
     """Get phyche_list and check it.
 
     :param k: int, the value of k-tuple.
@@ -90,7 +93,7 @@ def get_phyche_list(k, phyche_list, extra_index_file, all_prop=False):
             error_info = 'Error, The phyche_list, extra_index_file and all_prop can\'t be all False.'
             raise ValueError(error_info)
 
-    from pseALL.data import index_list
+    from data import index_list
 
     # Set all_prop_list.
     all_prop_list = []
@@ -166,7 +169,7 @@ def extend_aaindex(filename):
     """Extend the user-defined AAIndex from user's file.
     :return: a list of AAIndex obj.
     """
-    from pseALL.scrip.extract_aaindex import extra_aaindex, norm_index_vals
+    from scrip.extract_aaindex import extra_aaindex, norm_index_vals
 
     aaindex = extra_aaindex(filename)
     for ind, e in enumerate(aaindex):
@@ -361,89 +364,146 @@ def make_pseknc_vector(sequence_list, phyche_value, k=2, w=0.05, lamada=1, alpha
 
 
 if __name__ == '__main__':
+    import argparse
+    from argparse import RawTextHelpFormatter
 
+    parse = argparse.ArgumentParser(description="This is pse model for generate pse vector.",
+                                    formatter_class=RawTextHelpFormatter)
+    parse.add_argument('inputfile',
+                       help="The input file, in valid FASTA format.")
+    parse.add_argument('outputfile',
+                       help="The outputfile stored results.")
+    parse.add_argument('k', type=int,
+                       help="The value of kmer.")
+    parse.add_argument('lamada', type=int,
+                       help="The value of lamada.")
+    parse.add_argument('w', type=float,
+                       help="The value of weight.")
+    parse.add_argument('alphabet', choices=['DNA', 'RNA', 'PROTEIN'],
+                       help="The alphabet of sequences.")
+    parse.add_argument('-t', default=1, type=int, choices=[1, 2, 3],
+                       help="The type of Pse. (default = 1)\n"
+                            "1 means parallel correlation PseKNC.\n"
+                            "2 means series correlation PseKNC.\n"
+                            "3 means iPseKNC.\n")
+    parse.add_argument('-e',
+                       help="The user-defined indices file.")
+    parse.add_argument('-i', nargs='*',
+                       help="The indices user choose.")
+    parse.add_argument('-a', default=False, type=bool, choices=[True, False],
+                       help="Choose all physicochemical indices or not. (default = False)")
+    parse.add_argument('-f', default='tab', choices=['tab', 'svm', 'csv'],
+                       help="The output format (default = tab).\n"
+                            "tab -- Simple format, delimited by TAB.\n"
+                            "svm -- The libSVM training data format.\n"
+                            "csv -- The format that can be loaded into a spreadsheet program.")
 
-    # Test dna type1.
-    print("Test di_dna, type1.")
-    alphabet = index_list.DNA
-    res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=2, w=0.5, lamada=10,
-                 phyche_list=['Tilt', 'Roll', 'Rise', 'Slide', 'Shift'],
-                 extra_index_file="data/test_ext_dna.txt", alphabet=alphabet)
+    args = parse.parse_args()
 
-    for e in res:
-        print(e)
+    print(args)
 
-    print("Test tri_dna, type1.")
-    alphabet = index_list.DNA
-    res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=3, w=0.5, lamada=10,
-                 phyche_list=['Dnase I'],
-                 extra_index_file="data/test_ext_tridna.txt", alphabet=alphabet)
+    # PseDNC.
+    if args.alphabet == 'DNA':
+        args.alphabet = index_list.DNA
+        if args.i is None:
+            args.i = []
 
-    for e in res:
-        print(e)
+        if args.t != 3:
+            if args.e is None and len(args.i) == 0 and args.a is False:
+                # Default PseDNC.
+                default_e = ['Rise', 'Roll', 'Shift', 'Slide', 'Tilt', 'Twist']
+                res = pseknc(args.inputfile, args.k, args.w, args.lamada, default_e, args.alphabet,
+                             extra_index_file=args.e, all_prop=args.a, theta_type=args.t)
+            else:
+                res = pseknc(args.inputfile, args.k, args.w, args.lamada, args.i, args.alphabet,
+                             extra_index_file=args.e, all_prop=args.a, theta_type=1)
+        elif args.t == 3:
+            res = ipseknc(args.inputfile, args.k, args.w, args.lamada, args.i, args.alphabet,
+                          extra_index_file=args.e, all_prop=args.a)
 
-    # Test dna type2
-    print("Test di_dna, type2.")
-    alphabet = index_list.DNA
-    res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=2, w=0.5, lamada=2,
-                 phyche_list=['Tilt', 'Roll', 'Twist'],
-                 extra_index_file=None, alphabet=alphabet, theta_type=2)
+        print(res)
 
-    for e in res:
-        print(len(e), e)
-
-    print("Test tri_dna, type2.")
-    alphabet = index_list.DNA
-    res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=3, w=0.5, lamada=2,
-                 phyche_list=['Dnase I'],
-                 extra_index_file="data/test_ext_tridna.txt", alphabet=alphabet, theta_type=2)
-
-    for e in res:
-        print(e)
-
-    # Test iPseKNC.
-    print("Test iPseKNC.")
-    alphabet = index_list.DNA
-    res = ipseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=3, w=0.5, lamada=10,
-                  phyche_list=['Tilt', 'Roll', 'Rise', 'Slide', 'Shift'],
-                  extra_index_file="data/test_ext_dna.txt", alphabet=alphabet)
-
-    for e in res:
-        print(len(e), e)
-
-    # Test rna.
-    default_indexs = ['Twist (RNA)', 'Tilt (RNA)', 'Roll (RNA)', 'Rise (RNA)', 'Slide (RNA)', 'Shift (RNA)',
-                      'Stacking energy (RNA)', 'Enthalpy (RNA)1', 'Entropy (RNA)', 'Free energy (RNA)',
-                      'Hydrophilicity (RNA)']
-
-    _default_indexs = ['Twist (RNA)', 'Tilt (RNA)', 'Roll (RNA)', 'Rise (RNA)', 'Slide (RNA)', 'Shift (RNA)',
-                       'Stacking energy (RNA)', 'Enthalpy (RNA)1', 'Entropy (RNA)', 'Free energy (RNA)']
-
-    print("Test rna, type1.")
-    alphabet = index_list.RNA
-    res = pseknc(input_data=['GACUGAACUGCACUUUGGUUUCAUAUUAUUUGCUC'], k=2, w=0.05, lamada=3,
-                 phyche_list=_default_indexs, extra_index_file="data/test_ext_rna.txt",
-                 alphabet=alphabet, theta_type=1)
-    print(res)
-
-    print("Test rna, type2.")
-    alphabet = index_list.RNA
-    res = pseknc(input_data=['GACUGAACUGCACUUUGGUUUCAUAUUAUUUGCUC'], k=2, w=0.05, lamada=3,
-                 phyche_list=['Slide (RNA)', 'Adenine content', 'Hydrophilicity (RNA)'], extra_index_file=None,
-                 alphabet=alphabet, theta_type=2)
-    print(res)
-
-    with open('data/test.fasta') as f:
-        res = get_data(f, alphabet='ACGT', desc=True)
-        for e in res:
-            print(e)
-
-    # Test protein.
-    default_pro = ['Hydrophobicity', 'Hydrophilicity', 'Mass']
-    alphabet = index_list.PROTEIN
-    res = pseknc(input_data=open('data/test.fasta'), k=1, w=0.05, lamada=2,
-                 phyche_list=['Hydrophobicity', 'Hydrophilicity'], extra_index_file="data/test_ext_pro.txt",
-                 alphabet=alphabet, theta_type=1)
-
-    for e in res:
-        print(len(e), e)
+    # # Test dna type1.
+    # print("Test di_dna, type1.")
+    # alphabet = index_list.DNA
+    # res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=2, w=0.5, lamada=10,
+    #              phyche_list=['Tilt', 'Roll', 'Rise', 'Slide', 'Shift'],
+    #              extra_index_file="data/test_ext_dna.txt", alphabet=alphabet)
+    #
+    # for e in res:
+    #     print(e)
+    #
+    # print("Test tri_dna, type1.")
+    # alphabet = index_list.DNA
+    # res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=3, w=0.5, lamada=10,
+    #              phyche_list=['Dnase I'],
+    #              extra_index_file="data/test_ext_tridna.txt", alphabet=alphabet)
+    #
+    # for e in res:
+    #     print(e)
+    #
+    # # Test dna type2
+    # print("Test di_dna, type2.")
+    # alphabet = index_list.DNA
+    # res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=2, w=0.5, lamada=2,
+    #              phyche_list=['Tilt', 'Roll', 'Twist'],
+    #              extra_index_file=None, alphabet=alphabet, theta_type=2)
+    #
+    # for e in res:
+    #     print(len(e), e)
+    #
+    # print("Test tri_dna, type2.")
+    # alphabet = index_list.DNA
+    # res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=3, w=0.5, lamada=2,
+    #              phyche_list=['Dnase I'],
+    #              extra_index_file="data/test_ext_tridna.txt", alphabet=alphabet, theta_type=2)
+    #
+    # for e in res:
+    #     print(e)
+    #
+    # # Test iPseKNC.
+    # print("Test iPseKNC.")
+    # alphabet = index_list.DNA
+    # res = ipseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=3, w=0.5, lamada=10,
+    #               phyche_list=['Tilt', 'Roll', 'Rise', 'Slide', 'Shift'],
+    #               extra_index_file="data/test_ext_dna.txt", alphabet=alphabet)
+    #
+    # for e in res:
+    #     print(len(e), e)
+    #
+    # # Test rna.
+    # default_indexs = ['Twist (RNA)', 'Tilt (RNA)', 'Roll (RNA)', 'Rise (RNA)', 'Slide (RNA)', 'Shift (RNA)',
+    #                   'Stacking energy (RNA)', 'Enthalpy (RNA)1', 'Entropy (RNA)', 'Free energy (RNA)',
+    #                   'Hydrophilicity (RNA)']
+    #
+    # _default_indexs = ['Twist (RNA)', 'Tilt (RNA)', 'Roll (RNA)', 'Rise (RNA)', 'Slide (RNA)', 'Shift (RNA)',
+    #                    'Stacking energy (RNA)', 'Enthalpy (RNA)1', 'Entropy (RNA)', 'Free energy (RNA)']
+    #
+    # print("Test rna, type1.")
+    # alphabet = index_list.RNA
+    # res = pseknc(input_data=['GACUGAACUGCACUUUGGUUUCAUAUUAUUUGCUC'], k=2, w=0.05, lamada=3,
+    #              phyche_list=_default_indexs, extra_index_file="data/test_ext_rna.txt",
+    #              alphabet=alphabet, theta_type=1)
+    # print(res)
+    #
+    # print("Test rna, type2.")
+    # alphabet = index_list.RNA
+    # res = pseknc(input_data=['GACUGAACUGCACUUUGGUUUCAUAUUAUUUGCUC'], k=2, w=0.05, lamada=3,
+    #              phyche_list=['Slide (RNA)', 'Adenine content', 'Hydrophilicity (RNA)'], extra_index_file=None,
+    #              alphabet=alphabet, theta_type=2)
+    # print(res)
+    #
+    # with open('data/test.fasta') as f:
+    #     res = get_data(f, alphabet='ACGT', desc=True)
+    #     for e in res:
+    #         print(e)
+    #
+    # # Test protein.
+    # default_pro = ['Hydrophobicity', 'Hydrophilicity', 'Mass']
+    # alphabet = index_list.PROTEIN
+    # res = pseknc(input_data=open('data/test.fasta'), k=1, w=0.05, lamada=2,
+    #              phyche_list=['Hydrophobicity', 'Hydrophilicity'], extra_index_file="data/test_ext_pro.txt",
+    #              alphabet=alphabet, theta_type=1)
+    #
+    # for e in res:
+    #     print(len(e), e)
