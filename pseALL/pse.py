@@ -33,7 +33,6 @@ def pseknc(input_data, k, w, lamada, phyche_list, alphabet, extra_index_file=Non
     """
     phyche_list = get_phyche_list(k, phyche_list,
                                   extra_index_file=extra_index_file, alphabet=alphabet, all_prop=all_prop)
-
     # Get phyche_vals.
     if alphabet == index_list.DNA or alphabet == index_list.RNA:
         if extra_index_file is not None:
@@ -48,8 +47,7 @@ def pseknc(input_data, k, w, lamada, phyche_list, alphabet, extra_index_file=Non
         if extra_index_file is not None:
             phyche_vals.extend(extend_aaindex(extra_index_file))
 
-    with open(input_data) as f:
-        seq_list = get_data(f, alphabet)
+    seq_list = get_data(input_data, alphabet)
 
     return make_pseknc_vector(seq_list, phyche_vals, k, w, lamada, alphabet, theta_type)
 
@@ -75,8 +73,7 @@ def ipseknc(input_data, k, w, lamada, phyche_list, alphabet, extra_index_file=No
     else:
         phyche_vals = get_phyche_value(k=2, phyche_list=phyche_list, alphabet=alphabet)
 
-    with open(input_data) as f:
-        seq_list = get_data(f, alphabet)
+    seq_list = get_data(input_data, alphabet)
 
     return make_pseknc_vector(seq_list, phyche_vals, k, w, lamada, alphabet, theta_type=3)
 
@@ -363,6 +360,66 @@ def make_pseknc_vector(sequence_list, phyche_value, k=2, w=0.05, lamada=1, alpha
     return vector
 
 
+def read_index(index_file):
+    with open(index_file) as f_ind:
+        lines = f_ind.readlines()
+        ind_list = [index.rstrip() for index in lines]
+        return ind_list
+
+
+def main(args):
+    with open(args.inputfile) as f:
+        # Get index_list.
+        if args.i is not None:
+            ind_list = read_index(args.i)
+        else:
+            ind_list = []
+
+        # Set Pse default index_list.
+        if args.alphabet == 'DNA':
+            args.alphabet = index_list.DNA
+            default_e = ['Rise', 'Roll', 'Shift', 'Slide', 'Tilt', 'Twist']
+        elif args.alphabet == 'RNA':
+            args.alphabet = index_list.RNA
+            default_e = ['Twist (RNA)', 'Tilt (RNA)', 'Roll (RNA)', 'Rise (RNA)', 'Slide (RNA)', 'Shift (RNA)',
+                         'Stacking energy (RNA)', 'Enthalpy (RNA)1', 'Entropy (RNA)', 'Free energy (RNA)',
+                         'Hydrophilicity (RNA)']
+        elif args.alphabet == 'PROTEIN':
+            args.alphabet = index_list.PROTEIN
+            default_e = ['Hydrophobicity', 'Hydrophilicity', 'Mass']
+
+        # PseKNC.
+        if args.t != 3:
+            if args.e is None and len(ind_list) == 0 and args.a is False:
+                # Default Pse.
+                res = pseknc(f, args.k, args.w, args.lamada, default_e, args.alphabet,
+                             extra_index_file=args.e, all_prop=args.a, theta_type=args.t)
+            else:
+                res = pseknc(f, args.k, args.w, args.lamada, ind_list, args.alphabet,
+                             extra_index_file=args.e, all_prop=args.a, theta_type=args.t)
+        # iPseKNC.
+        elif args.t == 3:
+            if args.e is None and len(ind_list) == 0 and args.a is False:
+                # Default iPse.
+                res = ipseknc(f, args.k, args.w, args.lamada, default_e, args.alphabet,
+                              extra_index_file=args.e, all_prop=args.a)
+            else:
+                res = ipseknc(f, args.k, args.w, args.lamada, ind_list, args.alphabet,
+                              extra_index_file=args.e, all_prop=args.a)
+
+    # Write correspond res file.
+    if args.f == 'tab':
+        from util import write_tab
+        write_tab(res, args.outputfile)
+    elif args.f == 'svm':
+        from util import write_libsvm
+        write_libsvm(res, [0] * len(res), args.outputfile)
+
+    # print(len(res[0]), res[0])
+
+    print("Done.")
+
+
 if __name__ == '__main__':
     import argparse
     from argparse import RawTextHelpFormatter
@@ -386,10 +443,10 @@ if __name__ == '__main__':
                             "1 means parallel correlation PseKNC.\n"
                             "2 means series correlation PseKNC.\n"
                             "3 means iPseKNC.\n")
+    parse.add_argument('-i',
+                       help="The indices file user choose.")
     parse.add_argument('-e',
                        help="The user-defined indices file.")
-    parse.add_argument('-i', nargs='*',
-                       help="The indices user choose.")
     parse.add_argument('-a', default=False, type=bool, choices=[True, False],
                        help="Choose all physicochemical indices or not. (default = False)")
     parse.add_argument('-f', default='tab', choices=['tab', 'svm', 'csv'],
@@ -398,40 +455,17 @@ if __name__ == '__main__':
                             "svm -- The libSVM training data format.\n"
                             "csv -- The format that can be loaded into a spreadsheet program.")
 
-    args = parse.parse_args()
-
-    print(args)
-
-    # PseDNC.
-    if args.alphabet == 'DNA':
-        args.alphabet = index_list.DNA
-        if args.i is None:
-            args.i = []
-
-        if args.t != 3:
-            if args.e is None and len(args.i) == 0 and args.a is False:
-                # Default PseDNC.
-                default_e = ['Rise', 'Roll', 'Shift', 'Slide', 'Tilt', 'Twist']
-                res = pseknc(args.inputfile, args.k, args.w, args.lamada, default_e, args.alphabet,
-                             extra_index_file=args.e, all_prop=args.a, theta_type=args.t)
-            else:
-                res = pseknc(args.inputfile, args.k, args.w, args.lamada, args.i, args.alphabet,
-                             extra_index_file=args.e, all_prop=args.a, theta_type=1)
-        elif args.t == 3:
-            res = ipseknc(args.inputfile, args.k, args.w, args.lamada, args.i, args.alphabet,
-                          extra_index_file=args.e, all_prop=args.a)
-
-        print(res)
+    main(parse.parse_args())
 
     # # Test dna type1.
     # print("Test di_dna, type1.")
     # alphabet = index_list.DNA
-    # res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=2, w=0.5, lamada=10,
+    # res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=2, w=0.5, lamada=1,
     #              phyche_list=['Tilt', 'Roll', 'Rise', 'Slide', 'Shift'],
     #              extra_index_file="data/test_ext_dna.txt", alphabet=alphabet)
     #
     # for e in res:
-    #     print(e)
+    #     print(len(e), e)
     #
     # print("Test tri_dna, type1.")
     # alphabet = index_list.DNA
@@ -441,8 +475,8 @@ if __name__ == '__main__':
     #
     # for e in res:
     #     print(e)
-    #
-    # # Test dna type2
+
+    # Test dna type2
     # print("Test di_dna, type2.")
     # alphabet = index_list.DNA
     # res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=2, w=0.5, lamada=2,
@@ -460,8 +494,8 @@ if __name__ == '__main__':
     #
     # for e in res:
     #     print(e)
-    #
-    # # Test iPseKNC.
+
+    # Test iPseKNC.
     # print("Test iPseKNC.")
     # alphabet = index_list.DNA
     # res = ipseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=3, w=0.5, lamada=10,
@@ -489,19 +523,14 @@ if __name__ == '__main__':
     # print("Test rna, type2.")
     # alphabet = index_list.RNA
     # res = pseknc(input_data=['GACUGAACUGCACUUUGGUUUCAUAUUAUUUGCUC'], k=2, w=0.05, lamada=3,
-    #              phyche_list=['Slide (RNA)', 'Adenine content', 'Hydrophilicity (RNA)'], extra_index_file=None,
+    #              phyche_list=_default_indexs, extra_index_file="data/test_ext_rna.txt",
     #              alphabet=alphabet, theta_type=2)
-    # print(res)
+    # print(len(res[0]), res[0])
     #
-    # with open('data/test.fasta') as f:
-    #     res = get_data(f, alphabet='ACGT', desc=True)
-    #     for e in res:
-    #         print(e)
-    #
-    # # Test protein.
+    # Test protein.
     # default_pro = ['Hydrophobicity', 'Hydrophilicity', 'Mass']
     # alphabet = index_list.PROTEIN
-    # res = pseknc(input_data=open('data/test.fasta'), k=1, w=0.05, lamada=2,
+    # res = pseknc(input_data=open('data/test_pro.fasta'), k=1, w=0.05, lamada=2,
     #              phyche_list=['Hydrophobicity', 'Hydrophilicity'], extra_index_file="data/test_ext_pro.txt",
     #              alphabet=alphabet, theta_type=1)
     #
