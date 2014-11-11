@@ -238,7 +238,7 @@ def frequency(tol_str, tar_str):
 
 
 def write_libsvm(vector_list, label_list, write_file):
-    """Write the vector into disk in livSVM format."""
+    """Write the vectors into disk in livSVM format."""
     len_vector_list = len(vector_list)
     len_label_list = len(label_list)
     if len_vector_list == 0:
@@ -258,13 +258,23 @@ def write_libsvm(vector_list, label_list, write_file):
 
 
 def write_tab(_vecs, write_file):
-    """Write the vector into disk in tab format."""
+    """Write the vectors into disk in tab format."""
     with open(write_file, 'w') as f:
         for vec in _vecs:
             f.write(str(vec[0]))
             for val in vec[1:]:
                 f.write('\t' + str(val))
             f.write('\n')
+
+
+def write_csv(_vecs, write_file):
+    """Write the vectors into disk in csv format."""
+    import csv
+    with open(write_file, 'wb') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=' ',
+                                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        for vec in _vecs:
+            spamwriter.writerow(vec)
 
 
 def convert_phyche_index_to_dict(phyche_index, alphabet):

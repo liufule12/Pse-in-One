@@ -123,31 +123,7 @@ def make_kmer_vector(k, alphabet, filename, revcomp=False):
     return vector
 
 
-if __name__ == '__main__':
-    import argparse
-    from argparse import RawTextHelpFormatter
-
-    parse = argparse.ArgumentParser(description="This is a kmer module for generate kmer vector.",
-                                    formatter_class=RawTextHelpFormatter)
-    parse.add_argument('inputfile',
-                       help="The input file, in valid FASTA format.")
-    parse.add_argument('outputfile',
-                       help="The outputfile stored results.")
-    parse.add_argument('k', type=int, choices=range(1, 7),
-                       help="The k value of kmer.")
-    parse.add_argument('alphabet', choices=['DNA', 'RNA', 'PROTEIN'],
-                       help="The alphabet of sequences.")
-    parse.add_argument('-r', default=0, type=int, choices=[1, 0],
-                       help="Whether need to reverse complement.\n"
-                            "1 means True, 0 means False. (default = 0)")
-    parse.add_argument('-f', default='tab', choices=['tab', 'svm', 'csv'],
-                       help="The output format (default = tab).\n"
-                            "tab -- Simple format, delimited by TAB.\n"
-                            "svm -- The libSVM training data format.\n"
-                            "csv -- The format that can be loaded into a spreadsheet program.")
-
-    args = parse.parse_args()
-
+def main(args):
     # Set revcomp parameter.
     if args.r != 1:
         args.r = False
@@ -173,5 +149,36 @@ if __name__ == '__main__':
     elif args.f == 'tab':
         from util import write_tab
         write_tab(res, args.outputfile)
+    elif args.f == 'csv':
+        from util import write_csv
+        write_csv(res, args.outputfile)
 
     print("Done.")
+
+
+if __name__ == '__main__':
+    import argparse
+    from argparse import RawTextHelpFormatter
+
+    parse = argparse.ArgumentParser(description="This is a kmer module for generate kmer vector.",
+                                    formatter_class=RawTextHelpFormatter)
+    parse.add_argument('inputfile',
+                       help="The input file, in valid FASTA format.")
+    parse.add_argument('outputfile',
+                       help="The outputfile stored results.")
+    parse.add_argument('k', type=int, choices=range(1, 7),
+                       help="The k value of kmer.")
+    parse.add_argument('alphabet', choices=['DNA', 'RNA', 'PROTEIN'],
+                       help="The alphabet of sequences.")
+    parse.add_argument('-r', default=0, type=int, choices=[1, 0],
+                       help="Whether need to reverse complement.\n"
+                            "1 means True, 0 means False. (default = 0)")
+    parse.add_argument('-f', default='tab', choices=['tab', 'svm', 'csv'],
+                       help="The output format (default = tab).\n"
+                            "tab -- Simple format, delimited by TAB.\n"
+                            "svm -- The libSVM training data format.\n"
+                            "csv -- The format that can be loaded into a spreadsheet program.")
+
+    args = parse.parse_args()
+
+    main(args)

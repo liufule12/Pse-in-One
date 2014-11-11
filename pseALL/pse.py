@@ -414,6 +414,9 @@ def main(args):
     elif args.f == 'svm':
         from util import write_libsvm
         write_libsvm(res, [0] * len(res), args.outputfile)
+    elif args.f == 'csv':
+        from util import write_csv
+        write_csv(res, args.outputfile)
 
     # print(len(res[0]), res[0])
 
