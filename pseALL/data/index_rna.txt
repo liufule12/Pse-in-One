@@ -1,0 +1,10 @@
+Twist (RNA)
+Tilt (RNA)
+Roll (RNA)
+Rise (RNA)
+Slide (RNA)
+Shift (RNA)
+Stacking energy (RNA)
+Enthalpy (RNA)1
+Entropy (RNA)
+Free energy (RNA)
