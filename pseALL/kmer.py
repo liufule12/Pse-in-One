@@ -3,9 +3,9 @@ __author__ = 'Fule Liu'
 import sys
 import re
 
-from pseALL.util import frequency
-from pseALL.util import get_data
-from pseALL.data import index_list
+from util import frequency
+from util import get_data
+from data import index_list
 
 sys.setrecursionlimit(99999999)
 
