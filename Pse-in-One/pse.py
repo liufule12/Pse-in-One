@@ -135,13 +135,15 @@ def get_phyche_list(k, phyche_list, extra_index_file, alphabet, all_prop=False):
 
 
 def get_extra_index(filename):
+    """Get the extend indices from index file, only work for DNA and RNA."""
     extra_index_vals = []
     with open(filename) as f:
         lines = f.readlines()
-        for line in lines:
-            line = line.rstrip().split('\t')
-            vals = [float(val) for val in line[1:]]
-            extra_index_vals.append(vals)
+        for ind, line in enumerate(lines):
+            if line[0] == '>':
+                vals = lines[ind+2].rstrip().split('\t')
+                vals = [float(val) for val in vals]
+                extra_index_vals.append(vals)
 
     return extra_index_vals
 
@@ -171,6 +173,22 @@ def extend_aaindex(filename):
     aaindex = extra_aaindex(filename)
     for ind, e in enumerate(aaindex):
         aaindex[ind] = AAIndex(e.head, norm_index_vals(e.index_dict))
+
+    return aaindex
+
+
+def get_ext_ind_pro(filename):
+    """Get the extend indices from index file, only work for protein."""
+    inds = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+    aaindex = []
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+        for i, line in enumerate(lines):
+            if line[0] == '>':
+                temp_name = line[1:].rstrip()
+                vals = lines[i+2].rstrip().split('\t')
+                ind_val = {ind: float(val) for ind, val in zip(inds, vals)}
+                aaindex.append(AAIndex(temp_name, ind_val))
 
     return aaindex
 
@@ -460,7 +478,7 @@ if __name__ == '__main__':
 
     main(parse.parse_args())
 
-    # # Test dna type1.
+    # Test dna type1.
     # print("Test di_dna, type1.")
     # alphabet = index_list.DNA
     # res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=2, w=0.5, lamada=1,
@@ -529,8 +547,8 @@ if __name__ == '__main__':
     #              phyche_list=_default_indexs, extra_index_file="data/test_ext_rna.txt",
     #              alphabet=alphabet, theta_type=2)
     # print(len(res[0]), res[0])
-    #
-    # Test protein.
+
+    # # Test protein.
     # default_pro = ['Hydrophobicity', 'Hydrophilicity', 'Mass']
     # alphabet = index_list.PROTEIN
     # res = pseknc(input_data=open('data/test_pro.fasta'), k=1, w=0.05, lamada=2,
