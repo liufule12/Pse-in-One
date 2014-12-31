@@ -163,15 +163,15 @@ if __name__ == '__main__':
     parse = argparse.ArgumentParser(description="This is a kmer module for generate kmer vector.",
                                     formatter_class=RawTextHelpFormatter)
     parse.add_argument('inputfile',
-                       help="The input file, in valid FASTA format.")
+                       help="The input file in FASTA format.")
     parse.add_argument('outputfile',
-                       help="The outputfile stored results.")
+                       help="The output file stored results.")
     parse.add_argument('k', type=int, choices=range(1, 7),
                        help="The k value of kmer.")
     parse.add_argument('alphabet', choices=['DNA', 'RNA', 'PROTEIN'],
-                       help="The alphabet of sequences.")
+                       help="The sequence type.")
     parse.add_argument('-r', default=0, type=int, choices=[1, 0],
-                       help="Whether need to reverse complement.\n"
+                       help="Whether consider the reverse complement or not.\n"
                             "1 means True, 0 means False. (default = 0)")
     parse.add_argument('-f', default='tab', choices=['tab', 'svm', 'csv'],
                        help="The output format (default = tab).\n"
