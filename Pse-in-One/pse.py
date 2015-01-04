@@ -420,7 +420,7 @@ def main(args):
                 default_e = const.tri_inds_DNA
         elif args.alphabet == 'RNA':
             args.alphabet = index_list.RNA
-            default_e = const.tri_inds_RNA
+            default_e = const.di_inds_RNA
         elif args.alphabet == 'PROTEIN':
             args.alphabet = index_list.PROTEIN
             default_e = const.inds_3_Protein

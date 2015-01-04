@@ -17,6 +17,6 @@ tri_inds_DNA = ['Dnase I', 'Bendability (DNAse)', 'Bendability (consensus)', 'Tr
                 'Nucleosome positioning', 'Consensus_roll', 'Consensus-Rigid', 'Dnase I-Rigid', 'MW-Daltons',
                 'MW-kg', 'Nucleosome', 'Nucleosome-Rigid']
 
-tri_inds_RNA = ['Twist (RNA)', 'Tilt (RNA)', 'Roll (RNA)', 'Rise (RNA)', 'Slide (RNA)', 'Shift (RNA)',
+di_inds_RNA = ['Twist (RNA)', 'Tilt (RNA)', 'Roll (RNA)', 'Rise (RNA)', 'Slide (RNA)', 'Shift (RNA)',
                 'Stacking energy (RNA)', 'Enthalpy (RNA)1', 'Entropy (RNA)', 'Free energy (RNA)', 'Hydrophilicity (RNA)']
 inds_3_Protein = ['Hydrophobicity', 'Hydrophilicity', 'Mass']
