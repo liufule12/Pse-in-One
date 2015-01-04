@@ -1,7 +1,8 @@
 __author__ = 'Fule Liu'
 
 
-from util import get_data
+import const
+from util import get_data, check_args, read_k
 from pse import get_phyche_list, get_extra_index, get_phyche_value, get_aaindex, extend_aaindex, AAIndex
 from data import index_list
 
@@ -129,6 +130,8 @@ def make_acc_vec(seqs, lag, phyche_values, k):
 
 def main(args):
     with open(args.inputfile) as f:
+        k = read_k(args.alphabet, args.method, 0)
+
         # Get index_list.
         if args.i is not None:
             from pse import read_index
@@ -139,24 +142,35 @@ def main(args):
         # Set Pse default index_list.
         if args.alphabet == 'DNA':
             args.alphabet = index_list.DNA
-            default_e = ['Rise', 'Roll', 'Shift', 'Slide', 'Tilt', 'Twist']
+            if k == 2:
+                default_e = const.DI_INDS_6_DNA
+            elif k == 3:
+                default_e = const.TRI_INDS_DNA
         elif args.alphabet == 'RNA':
             args.alphabet = index_list.RNA
-            default_e = ['Twist (RNA)', 'Tilt (RNA)', 'Roll (RNA)', 'Rise (RNA)', 'Slide (RNA)', 'Shift (RNA)',
-                         'Stacking energy (RNA)', 'Enthalpy (RNA)1', 'Entropy (RNA)', 'Free energy (RNA)',
-                         'Hydrophilicity (RNA)']
-        elif args.alphabet == 'PROTEIN':
+            default_e = const.DI_INDS_RNA
+        elif args.alphabet == 'Protein':
             args.alphabet = index_list.PROTEIN
-            default_e = ['Hydrophobicity', 'Hydrophilicity', 'Mass']
+            default_e = const.INDS_3_PROTEIN
+
+        theta_type = 1
+        if args.method in const.METHODS_AC:
+            theta_type = 1
+        elif args.method in const.METHODS_CC:
+            theta_type = 2
+        elif args.method in const.METHODS_ACC:
+            theta_type = 3
+        else:
+            print("Method error!")
 
         # ACC.
         if args.e is None and len(ind_list) == 0 and args.a is False:
             # Default Pse.
-            res = acc(f, args.k, args.lag, default_e, args.alphabet,
-                      extra_index_file=args.e, all_prop=args.a, theta_type=args.t)
+            res = acc(f, k, args.lag, default_e, args.alphabet,
+                      extra_index_file=args.e, all_prop=args.a, theta_type=theta_type)
         else:
-            res = acc(f, args.k, args.lag, ind_list, args.alphabet,
-                      extra_index_file=args.e, all_prop=args.a, theta_type=args.t)
+            res = acc(f, k, args.lag, ind_list, args.alphabet,
+                      extra_index_file=args.e, all_prop=args.a, theta_type=theta_type)
 
     # Write correspond res file.
     if args.f == 'tab':
@@ -178,23 +192,18 @@ if __name__ == '__main__':
     import argparse
     from argparse import RawTextHelpFormatter
 
-    parse = argparse.ArgumentParser(description="This is acc model for generate acc vector.",
+    parse = argparse.ArgumentParser(description="This is acc module for generate acc vector.",
                                     formatter_class=RawTextHelpFormatter)
     parse.add_argument('inputfile',
                        help="The input file, in valid FASTA format.")
     parse.add_argument('outputfile',
                        help="The outputfile stored results.")
-    parse.add_argument('k', type=int,
-                       help="The value of k-tuple.")
     parse.add_argument('lag', type=int,
                        help="The value of lag.")
-    parse.add_argument('alphabet', choices=['DNA', 'RNA', 'PROTEIN'],
+    parse.add_argument('alphabet', choices=['DNA', 'RNA', 'Protein'],
                        help="The alphabet of sequences.")
-    parse.add_argument('-t', default=1, type=int, choices=[1, 2, 3],
-                       help="The type of ACC. (default = 1)\n"
-                            "1 means AC.\n"
-                            "2 means CC.\n"
-                            "3 means ACC.\n")
+    parse.add_argument('method', type=str,
+                       help="The method name of autocorrelation.")
     parse.add_argument('-i',
                        help="The indices file user choose.")
     parse.add_argument('-e',
@@ -207,7 +216,11 @@ if __name__ == '__main__':
                             "svm -- The libSVM training data format.\n"
                             "csv -- The format that can be loaded into a spreadsheet program.")
 
-    main(parse.parse_args())
+    args = parse.parse_args()
+    # print(args)
+
+    if check_args(args):
+        main(args)
 
     # # Test ACC for DNA.
     # print("Test ACC for DNA.")
