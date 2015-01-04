@@ -328,6 +328,24 @@ def normalize_index(phyche_index, alphabet, is_convert_dict=False):
     return normalize_phyche_value
 
 
+def check_args(args):
+    """Check pse and acc method args."""
+    import const
+    if 'w' in args:
+        if args.w < 0 or args.w > 1:
+            print("Error: The value of w must be no less than 0 and no larger than 1.")
+            return False
+    if 'method' in args:
+        if args.method not in const.methods_all:
+            print("Error: the method parameter can only be ", const.methods_all)
+            return False
+    if 'k' in args:
+        if args.k <= 0:
+            print("Error: the value of k must be an inter and larger than 0.")
+            return False
+    return True
+
+
 if __name__ == '__main__':
     # phyche_index = \
     #     [[0.026, 0.036, 0.031, 0.033, 0.016, 0.026, 0.014, 0.031, 0.025, 0.025, 0.026, 0.036, 0.017, 0.025, 0.016, 0.026],

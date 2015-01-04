@@ -5,8 +5,10 @@ import os
 import pickle
 from math import pow
 
+import const
 from util import frequency
 from util import get_data
+from util import check_args
 from kmer import make_kmer_list
 from data import index_list
 
@@ -385,6 +387,22 @@ def read_index(index_file):
         return ind_list
 
 
+def read_k(alphabet, _method, k):
+    if alphabet == 'Protein':
+        return 1
+    elif alphabet == 'RNA':
+        return 2
+
+    if _method in const.k_2_DNA_methods:
+        return 2
+    elif _method in const.k_3_DNA_methods:
+        return 3
+    elif _method == 'PseKNC':
+        return k
+    else:
+        print("Error in read_k.")
+
+
 def main(args):
     with open(args.inputfile) as f:
         # Get index_list.
@@ -396,34 +414,42 @@ def main(args):
         # Set Pse default index_list.
         if args.alphabet == 'DNA':
             args.alphabet = index_list.DNA
-            default_e = ['Rise', 'Roll', 'Shift', 'Slide', 'Tilt', 'Twist']
+            default_e = const.di_inds_6_DNA
         elif args.alphabet == 'RNA':
             args.alphabet = index_list.RNA
-            default_e = ['Twist (RNA)', 'Tilt (RNA)', 'Roll (RNA)', 'Rise (RNA)', 'Slide (RNA)', 'Shift (RNA)',
-                         'Stacking energy (RNA)', 'Enthalpy (RNA)1', 'Entropy (RNA)', 'Free energy (RNA)',
-                         'Hydrophilicity (RNA)']
+            default_e = const.tri_inds_RNA
         elif args.alphabet == 'PROTEIN':
             args.alphabet = index_list.PROTEIN
-            default_e = ['Hydrophobicity', 'Hydrophilicity', 'Mass']
+            default_e = const.inds_3_Protein
+
+        theta_type = 0
+        if args.method in const.theta_1_methods:
+            theta_type = 1
+        elif args.method in const.theta_2_methods:
+            theta_type = 2
+        elif args.method == 'PseKNC':
+            theta_type = 3
+        else:
+            print("Method error!")
 
         # PseKNC.
-        if args.t != 3:
+        if args.method != 'PseKNC':
             if args.e is None and len(ind_list) == 0 and args.a is False:
                 # Default Pse.
                 res = pseknc(f, args.k, args.w, args.lamada, default_e, args.alphabet,
-                             extra_index_file=args.e, all_prop=args.a, theta_type=args.t)
+                             extra_index_file=args.e, all_prop=args.a, theta_type=theta_type)
             else:
                 res = pseknc(f, args.k, args.w, args.lamada, ind_list, args.alphabet,
-                             extra_index_file=args.e, all_prop=args.a, theta_type=args.t)
+                             extra_index_file=args.e, all_prop=args.a, theta_type=theta_type)
         # iPseKNC.
-        elif args.t == 3:
+        else:
             if args.e is None and len(ind_list) == 0 and args.a is False:
                 # Default iPse.
                 res = ipseknc(f, args.k, args.w, args.lamada, default_e, args.alphabet,
-                              extra_index_file=args.e, all_prop=args.a)
+                              extra_index_file=args.e, all_prop=theta_type)
             else:
                 res = ipseknc(f, args.k, args.w, args.lamada, ind_list, args.alphabet,
-                              extra_index_file=args.e, all_prop=args.a)
+                              extra_index_file=args.e, all_prop=theta_type)
 
     # Write correspond res file.
     if args.f == 'tab':
@@ -451,19 +477,16 @@ if __name__ == '__main__':
                        help="The input file, in valid FASTA format.")
     parse.add_argument('outputfile',
                        help="The outputfile stored results.")
-    parse.add_argument('k', type=int,
-                       help="The value of kmer.")
     parse.add_argument('lamada', type=int,
                        help="The value of lamada.")
     parse.add_argument('w', type=float,
                        help="The value of weight.")
-    parse.add_argument('alphabet', choices=['DNA', 'RNA', 'PROTEIN'],
+    parse.add_argument('alphabet', choices=['DNA', 'RNA', 'Protein'],
                        help="The alphabet of sequences.")
-    parse.add_argument('-t', default=1, type=int, choices=[1, 2, 3],
-                       help="The type of Pse. (default = 1)\n"
-                            "1 means parallel correlation PseKNC.\n"
-                            "2 means series correlation PseKNC.\n"
-                            "3 means iPseKNC.\n")
+    parse.add_argument('method', default='PseDNC', type=str,
+                       help="The method name of pseudo components.")
+    parse.add_argument('-k', type=int,
+                       help="The value of kmer, it works only with PseKNC method.")
     parse.add_argument('-i',
                        help="The indices file user choose.")
     parse.add_argument('-e',
@@ -476,7 +499,11 @@ if __name__ == '__main__':
                             "svm -- The libSVM training data format.\n"
                             "csv -- The format that can be loaded into a spreadsheet program.")
 
-    main(parse.parse_args())
+    args = parse.parse_args()
+    args.k = read_k(args.alphabet, args.method, args.k)
+
+    if check_args(args):
+        main(args)
 
     # Test dna type1.
     # print("Test di_dna, type1.")
