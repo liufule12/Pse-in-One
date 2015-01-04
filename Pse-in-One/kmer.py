@@ -160,7 +160,7 @@ if __name__ == '__main__':
     import argparse
     from argparse import RawTextHelpFormatter
 
-    parse = argparse.ArgumentParser(description="This is a kmer module for generate kmer vector.",
+    parse = argparse.ArgumentParser(description="This is kmer module for generate kmer vector.",
                                     formatter_class=RawTextHelpFormatter)
     parse.add_argument('inputfile',
                        help="The input file in FASTA format.")
