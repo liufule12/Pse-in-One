@@ -414,7 +414,10 @@ def main(args):
         # Set Pse default index_list.
         if args.alphabet == 'DNA':
             args.alphabet = index_list.DNA
-            default_e = const.di_inds_6_DNA
+            if args.k == 2:
+                default_e = const.di_inds_6_DNA
+            elif args.k == 3:
+                default_e = const.tri_inds_DNA
         elif args.alphabet == 'RNA':
             args.alphabet = index_list.RNA
             default_e = const.tri_inds_RNA
@@ -502,6 +505,7 @@ if __name__ == '__main__':
     args = parse.parse_args()
     args.k = read_k(args.alphabet, args.method, args.k)
 
+    # print(args)
     if check_args(args):
         main(args)
 
