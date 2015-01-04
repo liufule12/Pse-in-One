@@ -271,7 +271,7 @@ def write_csv(_vecs, write_file):
     """Write the vectors into disk in csv format."""
     import csv
     with open(write_file, 'wb') as csvfile:
-        spamwriter = csv.writer(csvfile, delimiter=' ',
+        spamwriter = csv.writer(csvfile, delimiter=',',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for vec in _vecs:
             spamwriter.writerow(vec)
@@ -328,6 +328,23 @@ def normalize_index(phyche_index, alphabet, is_convert_dict=False):
     return normalize_phyche_value
 
 
+def read_k(alphabet, _method, k):
+    import const
+    if alphabet == 'Protein':
+        return 1
+    elif alphabet == 'RNA':
+        return 2
+
+    if _method in const.K_2_DNA_METHODS:
+        return 2
+    elif _method in const.K_3_DNA_METHODS:
+        return 3
+    elif _method == 'PseKNC':
+        return k
+    else:
+        print("Error in read_k.")
+
+
 def check_args(args):
     """Check pse and acc method args."""
     import const
@@ -336,8 +353,14 @@ def check_args(args):
             print("Error: The value of w must be no less than 0 and no larger than 1.")
             return False
     if 'method' in args:
-        if args.method not in const.methods_all:
-            print("Error: the method parameter can only be ", const.methods_all)
+        if args.alphabet == 'DNA' and args.method not in const.METHODS_DNA:
+            print("Error: the DNA method parameter can only be " + str(const.METHODS_DNA))
+            return False
+        elif args.alphabet == 'RNA' and args.method not in const.METHODS_RNA:
+            print("Error: the RNA method parameter can only be " + str(const.METHODS_RNA))
+            return False
+        elif args.alphabet == 'Protein' and args.method not in const.METHODS_PROTEIN:
+            print("Error: the Protein method parameter can only be " + str(const.METHODS_PROTEIN))
             return False
     if 'k' in args:
         if args.k <= 0:
