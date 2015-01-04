@@ -8,7 +8,7 @@ from math import pow
 import const
 from util import frequency
 from util import get_data
-from util import check_args
+from util import check_args, read_k
 from kmer import make_kmer_list
 from data import index_list
 
@@ -387,22 +387,6 @@ def read_index(index_file):
         return ind_list
 
 
-def read_k(alphabet, _method, k):
-    if alphabet == 'Protein':
-        return 1
-    elif alphabet == 'RNA':
-        return 2
-
-    if _method in const.k_2_DNA_methods:
-        return 2
-    elif _method in const.k_3_DNA_methods:
-        return 3
-    elif _method == 'PseKNC':
-        return k
-    else:
-        print("Error in read_k.")
-
-
 def main(args):
     with open(args.inputfile) as f:
         # Get index_list.
@@ -415,20 +399,20 @@ def main(args):
         if args.alphabet == 'DNA':
             args.alphabet = index_list.DNA
             if args.k == 2:
-                default_e = const.di_inds_6_DNA
+                default_e = const.DI_INDS_6_DNA
             elif args.k == 3:
-                default_e = const.tri_inds_DNA
+                default_e = const.TRI_INDS_DNA
         elif args.alphabet == 'RNA':
             args.alphabet = index_list.RNA
-            default_e = const.di_inds_RNA
+            default_e = const.DI_INDS_RNA
         elif args.alphabet == 'PROTEIN':
             args.alphabet = index_list.PROTEIN
-            default_e = const.inds_3_Protein
+            default_e = const.INDS_3_PROTEIN
 
-        theta_type = 0
-        if args.method in const.theta_1_methods:
+        theta_type = 1
+        if args.method in const.THETA_1_METHODS:
             theta_type = 1
-        elif args.method in const.theta_2_methods:
+        elif args.method in const.THETA_2_METHODS:
             theta_type = 2
         elif args.method == 'PseKNC':
             theta_type = 3
@@ -474,7 +458,7 @@ if __name__ == '__main__':
     import argparse
     from argparse import RawTextHelpFormatter
 
-    parse = argparse.ArgumentParser(description="This is pse model for generate pse vector.",
+    parse = argparse.ArgumentParser(description="This is pse module for generate pse vector.",
                                     formatter_class=RawTextHelpFormatter)
     parse.add_argument('inputfile',
                        help="The input file, in valid FASTA format.")
@@ -486,7 +470,7 @@ if __name__ == '__main__':
                        help="The value of weight.")
     parse.add_argument('alphabet', choices=['DNA', 'RNA', 'Protein'],
                        help="The alphabet of sequences.")
-    parse.add_argument('method', default='PseDNC', type=str,
+    parse.add_argument('method', type=str,
                        help="The method name of pseudo components.")
     parse.add_argument('-k', type=int,
                        help="The value of kmer, it works only with PseKNC method.")
