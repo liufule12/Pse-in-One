@@ -5,7 +5,7 @@ The Pse-in-One is able to generate totally 28 different features, including 14 f
 
 To the best of our knowledge, Pse-in-One is so far the first web server that can generate all the possible pseudo components for DNA, RNA, and protein sequences, and even those defined by users themselves, and hence it is extremely flexible.
 
-This Pse-in-One standalone version is open source software made available under GPL license. Please see the LICENSE file for further details.
+This Pse-in-One stand-alone version is open source software made available under GPL license. Please see the LICENSE file for further details.
 
 
 Important links
