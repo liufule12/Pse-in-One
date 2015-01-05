@@ -29,3 +29,5 @@ Usage
 You just need execute the corresponding file in command line environment.
 
 For example: `kmer.py test.txt output_kmer.txt 2 DNA`
+
+Please see the Pse-in-One_manual.pdf for more information. :D
