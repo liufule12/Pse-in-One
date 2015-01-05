@@ -7,8 +7,6 @@ from util import frequency
 from util import get_data
 from data import index_list
 
-sys.setrecursionlimit(99999999)
-
 
 def make_kmer_list(k, alphabet):
     if k < 0:
