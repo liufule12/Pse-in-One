@@ -158,7 +158,7 @@ if __name__ == '__main__':
                        help="The input file in FASTA format.")
     parse.add_argument('outputfile',
                        help="The output file stored results.")
-    parse.add_argument('k', type=int, choices=range(1, 7),
+    parse.add_argument('k', type=int,
                        help="The k value of kmer.")
     parse.add_argument('alphabet', choices=['DNA', 'RNA', 'PROTEIN'],
                        help="The sequence type.")
