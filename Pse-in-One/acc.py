@@ -178,7 +178,7 @@ def main(args):
         write_tab(res, args.outputfile)
     elif args.f == 'svm':
         from util import write_libsvm
-        write_libsvm(res, [0] * len(res), args.outputfile)
+        write_libsvm(res, [args.l] * len(res), args.outputfile)
     elif args.f == 'csv':
         from util import write_csv
         write_csv(res, args.outputfile)
@@ -215,6 +215,8 @@ if __name__ == '__main__':
                             "tab -- Simple format, delimited by TAB.\n"
                             "svm -- The libSVM training data format.\n"
                             "csv -- The format that can be loaded into a spreadsheet program.")
+    parse.add_argument('-l', default='+1', choices=['+1', '-1'],
+                       help="The libSVM output file label.")
 
     args = parse.parse_args()
     # print(args)
