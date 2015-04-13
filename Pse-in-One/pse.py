@@ -395,6 +395,7 @@ def main(args):
         else:
             ind_list = []
 
+        default_e = []
         # Set Pse default index_list.
         if args.alphabet == 'DNA':
             args.alphabet = index_list.DNA
@@ -405,7 +406,7 @@ def main(args):
         elif args.alphabet == 'RNA':
             args.alphabet = index_list.RNA
             default_e = const.DI_INDS_RNA
-        elif args.alphabet == 'PROTEIN':
+        elif args.alphabet == 'Protein':
             args.alphabet = index_list.PROTEIN
             default_e = const.INDS_3_PROTEIN
 

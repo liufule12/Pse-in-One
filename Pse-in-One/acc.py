@@ -139,6 +139,7 @@ def main(args):
         else:
             ind_list = []
 
+        default_e = []
         # Set Pse default index_list.
         if args.alphabet == 'DNA':
             args.alphabet = index_list.DNA
