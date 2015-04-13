@@ -345,7 +345,7 @@ def read_k(alphabet, _method, k):
         print("Error in read_k.")
 
 
-def check_args(args):
+def check_args(args, filename):
     """Check pse and acc method args."""
     import const
     if 'w' in args:
@@ -354,13 +354,28 @@ def check_args(args):
             return False
     if 'method' in args:
         if args.alphabet == 'DNA' and args.method not in const.METHODS_DNA:
-            print("Error: the DNA method parameter can only be " + str(const.METHODS_DNA))
+            if filename == const.ACC_FILENAME:
+                print("Error: the DNA method parameter can only be " + str(const.METHODS_DNA_ACC))
+            if filename == const.PSE_FILENAME:
+                print("Error: the DNA method parameter can only be " + str(const.METHODS_DNA_PSE))
+            else:
+                print("Error: the DNA method parameter error.")
             return False
         elif args.alphabet == 'RNA' and args.method not in const.METHODS_RNA:
-            print("Error: the RNA method parameter can only be " + str(const.METHODS_RNA))
+            if filename == const.ACC_FILENAME:
+                print("Error: the RNA method parameter can only be " + str(const.METHODS_RNA_ACC))
+            if filename == const.PSE_FILENAME:
+                print("Error: the RNA method parameter can only be " + str(const.METHODS_RNA_PSE))
+            else:
+                print("Error: the RNA method parameter error.")
             return False
         elif args.alphabet == 'Protein' and args.method not in const.METHODS_PROTEIN:
-            print("Error: the Protein method parameter can only be " + str(const.METHODS_PROTEIN))
+            if filename == const.ACC_FILENAME:
+                print("Error: the protein method parameter can only be " + str(const.METHODS_PROTEIN_ACC))
+            if filename == const.PSE_FILENAME:
+                print("Error: the protein method parameter can only be " + str(const.METHODS_PROTEIN_PSE))
+            else:
+                print("Error: the protein method parameter error.")
             return False
     if 'k' in args:
         if args.k <= 0:
