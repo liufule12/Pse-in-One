@@ -451,8 +451,6 @@ def main(args):
 
     # print(len(res[0]), res[0])
 
-    print("Done.")
-
 
 if __name__ == '__main__':
     import argparse
@@ -492,8 +490,10 @@ if __name__ == '__main__':
     args.k = read_k(args.alphabet, args.method, args.k)
 
     # print(args)
-    if check_args(args):
+    if check_args(args, 'pse.py'):
+        print("Calculating...")
         main(args)
+        print("Done.")
 
     # Test dna type1.
     # print("Test di_dna, type1.")

@@ -145,8 +145,6 @@ def main(args):
         from util import write_csv
         write_csv(res, args.outputfile)
 
-    print("Done.")
-
 
 if __name__ == '__main__':
     import argparse
@@ -175,4 +173,6 @@ if __name__ == '__main__':
 
     args = parse.parse_args()
 
+    print("Calculating...")
     main(args)
+    print("Done.")

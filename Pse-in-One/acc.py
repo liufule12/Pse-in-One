@@ -185,8 +185,6 @@ def main(args):
 
     # print(len(res[0]), res[0])
 
-    print("Done.")
-
 
 if __name__ == '__main__':
     import argparse
@@ -221,8 +219,10 @@ if __name__ == '__main__':
     args = parse.parse_args()
     # print(args)
 
-    if check_args(args):
+    if check_args(args, 'acc.py'):
+        print("Calculating...")
         main(args)
+        print("Done.")
 
     # # Test ACC for DNA.
     # print("Test ACC for DNA.")
