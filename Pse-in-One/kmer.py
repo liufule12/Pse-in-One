@@ -2,6 +2,7 @@ __author__ = 'Fule Liu'
 
 import sys
 import re
+import time
 
 from util import frequency
 from util import get_data
@@ -174,5 +175,7 @@ if __name__ == '__main__':
     args = parse.parse_args()
 
     print("Calculating...")
+    start_time = time.time()
     main(args)
     print("Done.")
+    print("Used time: %ss" % (start_time - time.time()))

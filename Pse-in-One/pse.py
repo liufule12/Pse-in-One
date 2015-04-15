@@ -4,6 +4,7 @@ import sys
 import os
 import pickle
 from math import pow
+import time
 
 import const
 from util import frequency
@@ -478,7 +479,9 @@ if __name__ == '__main__':
     parse.add_argument('-e',
                        help="The user-defined indices file.")
     parse.add_argument('-a', default=False, type=bool, choices=[True, False],
-                       help="Choose all physicochemical indices or not. (default = False)")
+                       help="Choose all physicochemical indices or not. (default = False)\n"
+                            "Note: if you set it True, "
+                            "computation time may be very long because of lots of physicochemical indices.")
     parse.add_argument('-f', default='tab', choices=['tab', 'svm', 'csv'],
                        help="The output format (default = tab).\n"
                             "tab -- Simple format, delimited by TAB.\n"
@@ -493,8 +496,10 @@ if __name__ == '__main__':
     # print(args)
     if check_args(args, 'pse.py'):
         print("Calculating...")
+        start_time = time.time()
         main(args)
         print("Done.")
+        print("Used time: %ss" % (start_time - time.time()))
 
     # Test dna type1.
     # print("Test di_dna, type1.")
