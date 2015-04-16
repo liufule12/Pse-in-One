@@ -205,12 +205,17 @@ if __name__ == '__main__':
     parse.add_argument('method', type=str,
                        help="The method name of autocorrelation.")
     parse.add_argument('-i',
-                       help="The indices file user choose.")
+                       help="The indices file user choose.\n"
+                            "Default indices:\n"
+                            "DNA dinucleotide: Rise, Roll, Shift, Slide, Tilt, Twist.\n"
+                            "DNA trinucleotide: Dnase I, Bendability (DNAse).\n"
+                            "RNA: Rise, Roll, Shift, Slide, Tilt, Twist.\n"
+                            "Protein: Hydrophobicity, Hydrophilicity, Mass.")
     parse.add_argument('-e',
                        help="The user-defined indices file.")
     parse.add_argument('-a', default=False, type=bool, choices=[True, False],
-                       help="Choose all physicochemical indices or not.(default=False)\n"
-                            "Note: if you set it True, "
+                       help="Choose all physicochemical indices or not. (default=False)\n"
+                            "If you set it True, "
                             "computation time may be very long because of lots of physicochemical indices.")
     parse.add_argument('-f', default='tab', choices=['tab', 'svm', 'csv'],
                        help="The output format (default = tab).\n"

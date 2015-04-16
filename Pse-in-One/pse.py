@@ -41,6 +41,7 @@ def pseknc(input_data, k, w, lamada, phyche_list, alphabet, extra_index_file=Non
         if extra_index_file is not None:
             extra_phyche_index = get_extra_index(extra_index_file)
             from util import normalize_index
+
             phyche_vals = get_phyche_value(k, phyche_list, alphabet,
                                            normalize_index(extra_phyche_index, alphabet, is_convert_dict=True))
         else:
@@ -72,7 +73,8 @@ def ipseknc(input_data, k, w, lamada, phyche_list, alphabet, extra_index_file=No
         from util import normalize_index
 
         phyche_vals = get_phyche_value(k=2, phyche_list=phyche_list, alphabet=alphabet,
-                                       extra_phyche_index=normalize_index(extra_phyche_index, alphabet, is_convert_dict=True))
+                                       extra_phyche_index=normalize_index(extra_phyche_index, alphabet,
+                                                                          is_convert_dict=True))
     else:
         phyche_vals = get_phyche_value(k=2, phyche_list=phyche_list, alphabet=alphabet)
 
@@ -144,7 +146,7 @@ def get_extra_index(filename):
         lines = f.readlines()
         for ind, line in enumerate(lines):
             if line[0] == '>':
-                vals = lines[ind+2].rstrip().split('\t')
+                vals = lines[ind + 2].rstrip().split('\t')
                 vals = [float(val) for val in vals]
                 extra_index_vals.append(vals)
 
@@ -189,7 +191,7 @@ def get_ext_ind_pro(filename):
         for i, line in enumerate(lines):
             if line[0] == '>':
                 temp_name = line[1:].rstrip()
-                vals = lines[i+2].rstrip().split('\t')
+                vals = lines[i + 2].rstrip().split('\t')
                 ind_val = {ind: float(val) for ind, val in zip(inds, vals)}
                 aaindex.append(AAIndex(temp_name, ind_val))
 
@@ -443,15 +445,18 @@ def main(args):
     # Write correspond res file.
     if args.f == 'tab':
         from util import write_tab
+
         write_tab(res, args.outputfile)
     elif args.f == 'svm':
         from util import write_libsvm
+
         write_libsvm(res, [args.l] * len(res), args.outputfile)
     elif args.f == 'csv':
         from util import write_csv
+
         write_csv(res, args.outputfile)
 
-    # print(len(res[0]), res[0])
+        # print(len(res[0]), res[0])
 
 
 if __name__ == '__main__':
@@ -475,12 +480,16 @@ if __name__ == '__main__':
     parse.add_argument('-k', type=int,
                        help="The value of kmer, it works only with PseKNC method.")
     parse.add_argument('-i',
-                       help="The indices file user choose.")
-    parse.add_argument('-e',
-                       help="The user-defined indices file.")
+                       help="The indices file user choose.\n"
+                            "Default indices:\n"
+                            "DNA dinucleotide: Rise, Roll, Shift, Slide, Tilt, Twist.\n"
+                            "DNA trinucleotide: Dnase I, Bendability (DNAse).\n"
+                            "RNA: Rise, Roll, Shift, Slide, Tilt, Twist.\n"
+                            "Protein: Hydrophobicity, Hydrophilicity, Mass.")
+    parse.add_argument('-e', help="The user-defined indices file.\n")
     parse.add_argument('-a', default=False, type=bool, choices=[True, False],
-                       help="Choose all physicochemical indices or not. (default = False)\n"
-                            "Note: if you set it True, "
+                       help="Choose all physicochemical indices or not. (default=False)\n"
+                            "If you set it True, "
                             "computation time may be very long because of lots of physicochemical indices.")
     parse.add_argument('-f', default='tab', choices=['tab', 'svm', 'csv'],
                        help="The output format (default = tab).\n"
@@ -496,17 +505,17 @@ if __name__ == '__main__':
     # print(args)
     if check_args(args, 'pse.py'):
         print("Calculating...")
-        start_time = time.time()
-        main(args)
-        print("Done.")
-        print("Used time: %ss" % (start_time - time.time()))
+    start_time = time.time()
+    main(args)
+    print("Done.")
+    print("Used time: %ss" % (start_time - time.time()))
 
     # Test dna type1.
     # print("Test di_dna, type1.")
     # alphabet = index_list.DNA
     # res = pseknc(input_data=['GACTGAACTGCACTTTGGTTTCATATTATTTGCTC'], k=2, w=0.5, lamada=1,
-    #              phyche_list=['Tilt', 'Roll', 'Rise', 'Slide', 'Shift'],
-    #              extra_index_file="data/test_ext_dna.txt", alphabet=alphabet)
+    # phyche_list=['Tilt', 'Roll', 'Rise', 'Slide', 'Shift'],
+    # extra_index_file="data/test_ext_dna.txt", alphabet=alphabet)
     #
     # for e in res:
     #     print(len(e), e)

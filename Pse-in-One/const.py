@@ -39,10 +39,7 @@ THETA_1_METHODS = ['PseDNC', 'PC-PseDNC-General', 'PC-PseTNC-General', 'PC-PseAA
 THETA_2_METHODS = ['SC-PseDNC-General', 'SC-PseTNC-General', 'SC-PseAAC', 'SC-PseAAC-General']
 
 DI_INDS_6_DNA = ['Rise', 'Roll', 'Shift', 'Slide', 'Tilt', 'Twist']
-TRI_INDS_DNA = ['Dnase I', 'Bendability (DNAse)', 'Bendability (consensus)', 'Trinucleotide GC Content',
-                'Nucleosome positioning', 'Consensus_roll', 'Consensus-Rigid', 'Dnase I-Rigid', 'MW-Daltons',
-                'MW-kg', 'Nucleosome', 'Nucleosome-Rigid']
+TRI_INDS_DNA = ['Dnase I', 'Bendability (DNAse)']
 
-DI_INDS_RNA = ['Twist (RNA)', 'Tilt (RNA)', 'Roll (RNA)', 'Rise (RNA)', 'Slide (RNA)', 'Shift (RNA)',
-               'Stacking energy (RNA)', 'Enthalpy (RNA)1', 'Entropy (RNA)', 'Free energy (RNA)', 'Hydrophilicity (RNA)']
+DI_INDS_RNA = ['Rise (RNA)', 'Roll (RNA)', 'Shift (RNA)', 'Slide (RNA)', 'Tilt (RNA)', 'Twist (RNA)']
 INDS_3_PROTEIN = ['Hydrophobicity', 'Hydrophilicity', 'Mass']
