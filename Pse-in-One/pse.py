@@ -436,11 +436,11 @@ def main(args):
         else:
             if args.e is None and len(ind_list) == 0 and args.a is False:
                 # Default iPse.
-                res = ipseknc(f, args.k, args.w, args.lamada, default_e, args.alphabet,
-                              extra_index_file=args.e, all_prop=theta_type)
+                res = ipseknc(f, args.k, args.w, args.lamada, const.DI_INDS_6_DNA, args.alphabet,
+                              extra_index_file=args.e, all_prop=args.a)
             else:
                 res = ipseknc(f, args.k, args.w, args.lamada, ind_list, args.alphabet,
-                              extra_index_file=args.e, all_prop=theta_type)
+                              extra_index_file=args.e, all_prop=args.a)
 
     # Write correspond res file.
     if args.f == 'tab':
@@ -508,7 +508,7 @@ if __name__ == '__main__':
     start_time = time.time()
     main(args)
     print("Done.")
-    print("Used time: %ss" % (start_time - time.time()))
+    print("Used time: %ss" % (time.time() - start_time))
 
     # Test dna type1.
     # print("Test di_dna, type1.")
