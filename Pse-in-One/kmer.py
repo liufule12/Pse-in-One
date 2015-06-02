@@ -109,7 +109,7 @@ def make_kmer_vector(k, alphabet, filename, revcomp=False):
             else:
                 revc_kmer_list = make_revcomp_kmer_list(kmer_list)
                 count_vec = [kmer_count[kmer] for kmer in revc_kmer_list]
-            count_vec = [round(float(e)/count_sum, 3) for e in count_vec]
+            count_vec = [round(float(e)/count_sum, 8) for e in count_vec]
 
             vector.append(count_vec)
 

@@ -374,9 +374,9 @@ def make_pseknc_vector(sequence_list, phyche_value, k=2, w=0.05, lamada=1, alpha
         # Generate the vector according the Equation 9.
         denominator = 1 + w * theta_sum
 
-        temp_vec = [round(f / denominator, 3) for f in fre_list]
+        temp_vec = [round(f / denominator, 8) for f in fre_list]
         for theta in theta_list:
-            temp_vec.append(round(w * theta / denominator, 3))
+            temp_vec.append(round(w * theta / denominator, 8))
 
         vector.append(temp_vec)
 
