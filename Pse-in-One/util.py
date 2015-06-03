@@ -1,6 +1,7 @@
 __author__ = 'Fule Liu'
 
 import sys
+import itertools
 
 
 """Used for process original data."""
@@ -289,7 +290,6 @@ def convert_phyche_index_to_dict(phyche_index, alphabet):
         if len_index_value == 4**i:
             k = i
             break
-    from repDNA.nacutil import make_kmer_list
     kmer_list = make_kmer_list(k, alphabet)
     # print kmer_list
     len_kmer = len(kmer_list)
@@ -302,6 +302,17 @@ def convert_phyche_index_to_dict(phyche_index, alphabet):
         phyche_index_dict[kmer_list[i]] = list(phyche_index[i])
 
     return phyche_index_dict
+
+
+def make_kmer_list(k, alphabet):
+    try:
+        return ["".join(e) for e in itertools.product(alphabet, repeat=k)]
+    except TypeError:
+        print("TypeError: k must be an inter and larger than 0, alphabet must be a string.")
+        raise TypeError
+    except ValueError:
+        print("TypeError: k must be an inter and larger than 0")
+        raise ValueError
 
 
 def standard_deviation(value_list):
