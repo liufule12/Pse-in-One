@@ -1,6 +1,5 @@
-# Version 1.0.0 (2015-05-09)
-
-* Pse-in-One package release.
+# Version 1.0.2
+* Use function make_kmer_list to replace repDNA.util.make_kmer_list in util.py
 
 # Version 1.0.1 (2015-06-02)
 
@@ -12,3 +11,7 @@
 * Add default indices argument.
 * Fix PseKNC default indices bug.
 * Change the result to 8 decimal.
+
+# Version 1.0.0 (2015-05-09)
+
+* Pse-in-One package release.
