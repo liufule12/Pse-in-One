@@ -1,5 +1,6 @@
 # Version 1.0.2
 * Use function make_kmer_list to replace repDNA.util.make_kmer_list in util.py
+* Add user_defined_property2 to make the user_indices.txt format more clear
 
 # Version 1.0.1 (2015-06-02)
 
