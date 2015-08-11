@@ -130,7 +130,7 @@ def main(args):
         args.alphabet = index_list.DNA
     elif args.alphabet == 'RNA':
         args.alphabet = index_list.RNA
-    elif args.alphabet == 'PROTEIN':
+    elif args.alphabet == 'Protein':
         args.alphabet = index_list.PROTEIN
 
     res = make_kmer_vector(k=args.k, alphabet=args.alphabet, filename=args.inputfile, revcomp=args.r)
@@ -159,7 +159,7 @@ if __name__ == '__main__':
                        help="The output file stored results.")
     parse.add_argument('k', type=int,
                        help="The k value of kmer.")
-    parse.add_argument('alphabet', choices=['DNA', 'RNA', 'PROTEIN'],
+    parse.add_argument('alphabet', choices=['DNA', 'RNA', 'Protein'],
                        help="The sequence type.")
     parse.add_argument('-r', default=0, type=int, choices=[1, 0],
                        help="Whether consider the reverse complement or not.\n"
