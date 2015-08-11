@@ -178,4 +178,4 @@ if __name__ == '__main__':
     start_time = time.time()
     main(args)
     print("Done.")
-    print("Used time: %ss" % (start_time - time.time()))
+    print("Used time: %ss" % (time.time() - start_time))
