@@ -1,6 +1,9 @@
-# Version 1.0.2
+# Version 1.0.2 (2015-08-16)
+
 * Use function make_kmer_list to replace repDNA.util.make_kmer_list in util.py
 * Add user_defined_property2 to make the user_indices.txt format more clear
+* Fix acc.py bug: used time is negative, argparse bool type for -a command
+* fix the command argument Protein conflict between kmer.py and acc.py
 
 # Version 1.0.1 (2015-06-02)
 
