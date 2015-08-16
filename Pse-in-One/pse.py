@@ -487,10 +487,10 @@ if __name__ == '__main__':
                             "RNA: Rise, Roll, Shift, Slide, Tilt, Twist.\n"
                             "Protein: Hydrophobicity, Hydrophilicity, Mass.")
     parse.add_argument('-e', help="The user-defined indices file.\n")
-    parse.add_argument('-a', default=False, type=bool, choices=[True, False],
-                       help="Choose all physicochemical indices or not. (default=False)\n"
-                            "If you set it True, "
-                            "computation time may be very long because of lots of physicochemical indices.")
+    parse.add_argument('-all_index', dest='a', action='store_true', help="Choose all physicochemical indices")
+    parse.add_argument('-no_all_index', dest='a', action='store_false',
+                       help="Do not choose all physicochemical indices, default.")
+    parse.set_defaults(a=False)
     parse.add_argument('-f', default='tab', choices=['tab', 'svm', 'csv'],
                        help="The output format (default = tab).\n"
                             "tab -- Simple format, delimited by TAB.\n"
