@@ -1,4 +1,9 @@
-# Version 1.0.2 (2015-08-16)
+# Version 1.0.3 (2015-08-21 dev)
+
+* change position parameters lag in acc.py, k in kmer.py, lamada and w in pse.py to optional parameter, add their default value.
+
+
+# Version 1.0.2 (2015-08-16 release)
 
 * Use function make_kmer_list to replace repDNA.util.make_kmer_list in util.py
 * Add user_defined_property2 to make the user_indices.txt format more clear
