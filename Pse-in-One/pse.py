@@ -469,14 +469,15 @@ if __name__ == '__main__':
                        help="The input file, in valid FASTA format.")
     parse.add_argument('outputfile',
                        help="The outputfile stored results.")
-    parse.add_argument('lamada', type=int,
-                       help="The value of lamada.")
-    parse.add_argument('w', type=float,
-                       help="The value of weight.")
     parse.add_argument('alphabet', choices=['DNA', 'RNA', 'Protein'],
                        help="The alphabet of sequences.")
     parse.add_argument('method', type=str,
                        help="The method name of pseudo components.")
+
+    parse.add_argument('-lamada', type=int, default=2,
+                       help="The value of lamada. default=2")
+    parse.add_argument('-w', type=float, default=0.1,
+                       help="The value of weight. default=0.1")
     parse.add_argument('-k', type=int,
                        help="The value of kmer, it works only with PseKNC method.")
     parse.add_argument('-i',
