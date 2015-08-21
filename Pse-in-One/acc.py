@@ -198,12 +198,13 @@ if __name__ == '__main__':
                        help="The input file, in valid FASTA format.")
     parse.add_argument('outputfile',
                        help="The outputfile stored results.")
-    parse.add_argument('lag', type=int,
-                       help="The value of lag.")
     parse.add_argument('alphabet', choices=['DNA', 'RNA', 'Protein'],
                        help="The alphabet of sequences.")
     parse.add_argument('method', type=str,
                        help="The method name of autocorrelation.")
+
+    parse.add_argument('-lag', type=int, default=2,
+                       help="The value of lag.")
     parse.add_argument('-i',
                        help="The indices file user choose.\n"
                             "Default indices:\n"
