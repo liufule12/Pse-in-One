@@ -157,10 +157,11 @@ if __name__ == '__main__':
                        help="The input file in FASTA format.")
     parse.add_argument('outputfile',
                        help="The output file stored results.")
-    parse.add_argument('k', type=int,
-                       help="The k value of kmer.")
     parse.add_argument('alphabet', choices=['DNA', 'RNA', 'Protein'],
                        help="The sequence type.")
+
+    parse.add_argument('-k', type=int, default=2,
+                       help="The k value of kmer.")
     parse.add_argument('-r', default=0, type=int, choices=[1, 0],
                        help="Whether consider the reverse complement or not.\n"
                             "1 means True, 0 means False. (default = 0)")
